@@ -1,0 +1,12 @@
+{
+  "name": "txtorbot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "handlerug",
+  "license": "WTFPL",
+  "homepage": "https://github.com/handlerug/txtorbot",
+  "dependencies": {
+    "grapheme-splitter": "^1.0.4",
+    "telegraf": "^3.25.5"
+  }
+}
