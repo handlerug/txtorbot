@@ -47,6 +47,7 @@ bot.on('inline_query', ctx => {
         result4 += i < 10 ? letters[n].toLowerCase() : letters[n].toUpperCase()
     }
     result4 += " " + ctx.inlineQuery.query.toUpperCase() + ")))"
+    const result5 = ctx.inlineQuery.query.replace(/([eе])/ig, (m, p, o, s) => p === p.toUpperCase() ? 'Ё' : 'ё');
 
     ctx.answerInlineQuery([
         {
@@ -84,7 +85,16 @@ bot.on('inline_query', ctx => {
             input_message_content: {
                 message_text: result4
             }
-        }
+        },
+        {
+            type: 'article',
+            id: Math.random() * 100,
+            title: 'Для поёхавших головой',
+            description: result5,
+            input_message_content: {
+                message_text: result5,
+            },
+        },
     ], {
         cache_time: 1,
         is_personal: true
