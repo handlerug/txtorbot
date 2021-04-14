@@ -111,11 +111,8 @@ async fn handle_inline_query(
     respond(())
 }
 
-/// Creates InlineQueryResult::Article with specified title and content. It also automatically
-/// truncates the content to prevent errors.
+/// Creates InlineQueryResult::Article with specified title and content.
 fn article_from_text(title: &str, content: &str) -> InlineQueryResult {
-    let content = truncate(content, 4096);
-
     // Concatenate all the text we have.
     let mut text = String::with_capacity(title.len() + content.len());
     text.push_str(title);
@@ -123,12 +120,9 @@ fn article_from_text(title: &str, content: &str) -> InlineQueryResult {
 
     // Hash the result to make a unique ID. seahash claims to be fast.
     let id = format!("{:016x}", seahash::hash(text.as_bytes()));
-    let description = truncate(content, 250); // 250 is an arbitrary number
     let input = InputMessageContent::Text(InputMessageContentText::new(content.to_owned()));
 
-    InlineQueryResult::Article(
-        InlineQueryResultArticle::new(id, title, input).description(description),
-    )
+    InlineQueryResult::Article(InlineQueryResultArticle::new(id, title, input).description(content))
 }
 
 /// Calls the predicate for every character and, if it returns true, prolongs them.
@@ -266,54 +260,4 @@ fn yoify(input: &str) -> String {
     }
 
     result
-}
-
-/// Truncates a string to have at most len bytes.
-fn truncate(input: &str, len: usize) -> &str {
-    if input.len() <= len {
-        return input;
-    }
-
-    let chars = input.char_indices().map(|a| a.0).collect::<Vec<usize>>();
-    let mut left = 0usize;
-    let mut right = chars.len() - 1;
-
-    while left + 1 < right {
-        let mid = (left + right) / 2;
-        let idx = chars[mid];
-
-        if idx < len {
-            left = mid;
-        } else {
-            right = mid;
-        }
-    }
-
-    &input[0..chars[right]]
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::truncate;
-
-    #[test]
-    fn test_truncate() {
-        let too_short = "a".repeat(1000);
-        let just_enough = "a".repeat(4096);
-        let too_long = "a".repeat(4100);
-        let tfw_unicode = "a".repeat(4095) + "ы";
-
-        assert_eq!(truncate(&too_short, 4096).len(), 1000, "too short");
-        assert_eq!(
-            truncate(&just_enough, 4096).len(),
-            4096,
-            "exactly 4096 bytes"
-        );
-        assert_eq!(truncate(&too_long, 4096).len(), 4096, "too long");
-        assert_eq!(
-            truncate(&tfw_unicode, 4096).len(),
-            4095,
-            "4097 bytes with a codepoint lying on the boundary"
-        );
-    }
 }
